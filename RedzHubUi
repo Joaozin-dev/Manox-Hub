@@ -1400,6 +1400,100 @@ function redzlib:SetScale(NewScale)
 	UIScale, ScreenGui.Scale.Scale = NewScale, NewScale
 end
 
+-- Criar GUI base se não existir
+local NotifGui = CoreGui:FindFirstChild("RedzHubNotifications")
+
+if not NotifGui then
+    NotifGui = Instance.new("ScreenGui")
+    NotifGui.Name = "RedzHubNotifications"
+    NotifGui.ResetOnSpawn = false
+    NotifGui.Parent = CoreGui
+end
+
+local Container = NotifGui:FindFirstChild("Container")
+
+if not Container then
+    Container = Instance.new("Frame")
+    Container.Size = UDim2.new(0, 320, 1, -20)
+    Container.Position = UDim2.new(1, -20, 1, -20)
+    Container.AnchorPoint = Vector2.new(1,1)
+    Container.BackgroundTransparency = 1
+    Container.Name = "Container"
+    Container.Parent = NotifGui
+
+    local UIList = Instance.new("UIListLayout")
+    UIList.Padding = UDim.new(0, 10)
+    UIList.HorizontalAlignment = Enum.HorizontalAlignment.Right
+    UIList.VerticalAlignment = Enum.VerticalAlignment.Bottom
+    UIList.Parent = Container
+end
+
+-- Função Notify estilo redzlib
+function redzlib:Notify(options)
+    local TitleText = options.Title or "Notification"
+    local ContentText = options.Content or ""
+    local Duration = options.Duration or 3
+
+    local Notification = Instance.new("Frame")
+    Notification.Size = UDim2.new(1, 0, 0, 0)
+    Notification.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    Notification.BorderSizePixel = 0
+    Notification.BackgroundTransparency = 0.05
+    Notification.Parent = Container
+    Notification.ClipsDescendants = true
+
+    local UICorner = Instance.new("UICorner")
+    UICorner.CornerRadius = UDim.new(0, 8)
+    UICorner.Parent = Notification
+
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, -10, 0, 22)
+    Title.Position = UDim2.new(0, 8, 0, 5)
+    Title.BackgroundTransparency = 1
+    Title.Text = TitleText
+    Title.Font = Enum.Font.GothamBold
+    Title.TextSize = 15
+    Title.TextColor3 = Color3.fromRGB(255,255,255)
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Parent = Notification
+
+    local Content = Instance.new("TextLabel")
+    Content.Size = UDim2.new(1, -10, 0, 35)
+    Content.Position = UDim2.new(0, 8, 0, 25)
+    Content.BackgroundTransparency = 1
+    Content.TextWrapped = true
+    Content.Text = ContentText
+    Content.Font = Enum.Font.Gotham
+    Content.TextSize = 13
+    Content.TextColor3 = Color3.fromRGB(200,200,200)
+    Content.TextXAlignment = Enum.TextXAlignment.Left
+    Content.TextYAlignment = Enum.TextYAlignment.Top
+    Content.Parent = Notification
+
+    -- Auto ajustar altura
+    task.wait()
+    local NeededSize = 35 + Content.TextBounds.Y + 10
+
+    TweenService:Create(
+        Notification,
+        TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {Size = UDim2.new(1, 0, 0, NeededSize)}
+    ):Play()
+
+    -- Remover depois do tempo
+    task.delay(Duration, function()
+        local Tween = TweenService:Create(
+            Notification,
+            TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+            {Size = UDim2.new(1, 0, 0, 0), BackgroundTransparency = 1}
+        )
+
+        Tween:Play()
+        Tween.Completed:Wait()
+        Notification:Destroy()
+    end)
+end
+
 function redzlib:MakeWindow(Configs)
 	local WTitle = Configs[1] or Configs.Name or Configs.Title or "redz Library V5"
 	local WMiniText = Configs[2] or Configs.SubTitle or "by : redz9999"
