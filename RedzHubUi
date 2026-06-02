@@ -887,12 +887,12 @@ local redzlib = {
 	end)()
 }
 
-local Fluent, response = pcall(function()
-    loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local success, Fluent = pcall(function()
+    return loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 end)
 
-if not Fluent then
-    warn("no notifications:", response)
+if not success then
+    warn("no notifications:")
 end
 
 local ViewportSize = workspace.CurrentCamera.ViewportSize
